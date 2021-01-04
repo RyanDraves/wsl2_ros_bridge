@@ -1,0 +1,75 @@
+#!/usr/bin/python3
+import rospy
+import roslibpy
+from functools import partial
+import time
+import csv
+
+class ConnectRosBridges:
+    def __init__(self, local_port, remote_addr, remote_port):
+        
+        self.local_host = roslibpy.Ros(host='localhost', port=local_port)
+        self.remote_host = roslibpy.Ros(host=remote_addr, port=remote_port)
+
+        # Ideally you'd run both... but something funky is going on underneath
+        # self.local_host.run()
+        self.remote_host.run()
+        self.sub_pubs = []
+
+        self.topics = set()
+
+    def connect(self, topic, msg_type, direction):
+        if topic in self.topics:
+            raise ValueError("Topic {} already added. Migitaging infinite loops to raising an error".format(topic))
+
+        if direction == "a-to-b":
+            sub = roslibpy.Topic(self.local_host, topic, msg_type)
+            pub = roslibpy.Topic(self.remote_host, topic, msg_type)
+        elif direction == "b-to-a":
+            sub = roslibpy.Topic(self.remote_host, topic, msg_type)
+            pub = roslibpy.Topic(self.local_host, topic, msg_type)
+        else:
+            raise ValueError("Please use \"a-to-b\" or \"b-to-a\" for the direction")
+
+        callback = partial(self.msg_callback, pub)
+        sub.subscribe(callback)
+
+        self.sub_pubs.append((sub, pub))
+        self.topics.add(topic)
+
+    def msg_callback(self, pub, msg):
+        pub.publish(msg)
+
+    def cleanup(self):
+        for sub_pub in self.sub_pubs:
+            sub_pub[1].unadvertise()
+
+        # Same as before... just run one
+        # local_host.terminate()
+        remote_host.terminate()
+
+rospy.init_node('wsl2_ros_bridge')
+
+local_port = rospy.get_param("~local_port")
+remote_host = rospy.get_param("~remote_host")
+remote_port = rospy.get_param("~remote_port")
+connections_file = rospy.get_param("~connections_file")
+
+# A very well-calculated sleep to let the rosbridge start from a launch file...
+time.sleep(3)
+
+connection = ConnectRosBridges(local_port, remote_host, remote_port)
+
+with open(connections_file) as fp:
+    reader = csv.reader(fp, delimiter=',')
+
+    # Skip header
+    next(reader)
+
+    for row in reader:
+        connection.connect(row[0], row[1], row[2])
+
+while not rospy.is_shutdown():
+    time.sleep(1)
+
+conection.cleanup()

@@ -1,0 +1,23 @@
+<!--
+  This file manages starting up WSL2 Ros Bridge and the rosbridge server you'd start locally
+-->
+
+<launch>
+    <!-- Whatever IP/hostname your remote machine has -->
+    <arg name="remote_host" default="boat" />
+    <arg name="remote_port" default="9090" />
+    <arg name="local_port" default="9090" />
+    <!-- Wherever your connections.csv file is located (see README) -->
+    <arg name="connections_file" default="$(find wsl2_ros_bridge)/example/connections.csv" />
+
+    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch">
+        <arg name="port" value="$(arg local_port)"/>
+    </include>
+
+    <node type="wsl2_ros_bridge" name="wsl2_ros_bridge" pkg="wsl2_ros_bridge" output="screen" required="true">
+        <param name="remote_host" value="$(arg remote_host)" />
+        <param name="remote_port" value="$(arg remote_port)" />
+        <param name="local_port" value="$(arg local_port)" />
+        <param name="connections_file" value="$(arg connections_file)" />
+    </node>
+</launch>

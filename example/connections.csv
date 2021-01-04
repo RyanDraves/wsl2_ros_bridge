@@ -1,0 +1,2 @@
+Topic,Msg Type,Direction
+/chatter,std_msgs/String,b-to-a
