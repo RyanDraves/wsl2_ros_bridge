@@ -30,3 +30,6 @@ The port arguments are optional and will default to `9090` if not specified.
 
 ## Known Issues
 If anything has been configured incorrectly, or perhaps the remote rosbridge_websocket is not running, then a _lot_ of errors will print out. `roslibpy` is pretty spammy.
+
+## Known Limitations
+Have not added support for sending TFs yet. Feel free to open a PR.
