@@ -21,10 +21,10 @@ Topic,Msg Type,Direction
 Please include the header row as well. The options for "Direction" are either `a-to-b` or `b-to-a`. `a-to-b` means "host to remote", i.e. "WSL2 to remote machine"; vice versa for `b-to-a`.
 
 From here you can run on the remote machine:
-- `roslaunch rosbridge_server rosbridge_websocket.launch port:=[todo]`
+- `roslaunch rosbridge_server rosbridge_websocket.launch port:=[some_port]`
 
 And afterwards on the WSL2:
-- `roslaunch wsl2_ros_bridge connect.launch remote_host:=[todo] remote_port:=[todo] local_port:=[todo]`
+- `roslaunch wsl2_ros_bridge connect.launch remote_host:=[some_address] remote_port:=[some_port] local_port:=[some_port] connections_file:=[path]`
 
 The port arguments are optional and will default to `9090` if not specified.
 
